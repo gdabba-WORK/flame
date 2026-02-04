@@ -20,7 +20,7 @@ class MultiTapDispatcherKey implements ComponentKey {
 
 class MultiTapDispatcher extends Component implements MultiTapListener {
   /// The record of all components currently being touched.
-  final Set<TaggedComponent<TapCallbacks>> _record = {};
+  final Set<TaggedComponent<TapCallbacks>> _records = {};
 
   FlameGame get game => parent! as FlameGame;
 
@@ -39,7 +39,7 @@ class MultiTapDispatcher extends Component implements MultiTapListener {
     event.deliverAtPoint(
       rootComponent: game,
       eventHandler: (TapCallbacks component) {
-        _record.add(TaggedComponent(event.pointerId, component));
+        _records.add(TaggedComponent(event.pointerId, component));
         component.onTapDown(event);
       },
     );
@@ -57,7 +57,7 @@ class MultiTapDispatcher extends Component implements MultiTapListener {
       rootComponent: game,
       eventHandler: (TapCallbacks component) {
         final record = TaggedComponent(event.pointerId, component);
-        if (_record.contains(record)) {
+        if (_records.contains(record)) {
           component.onLongTapDown(event);
         }
       },
@@ -81,12 +81,13 @@ class MultiTapDispatcher extends Component implements MultiTapListener {
     event.deliverAtPoint(
       rootComponent: game,
       eventHandler: (TapCallbacks component) {
-        if (_record.remove(TaggedComponent(event.pointerId, component))) {
+        if (_records.remove(TaggedComponent(event.pointerId, component))) {
           component.onTapUp(event);
         }
       },
       deliverToAll: true,
     );
+    _tapCancelImpl(TapCancelEvent(event.pointerId));
   }
 
   /// Called when there was an [onTapDown] event previously, but the [onTapUp]
@@ -103,7 +104,7 @@ class MultiTapDispatcher extends Component implements MultiTapListener {
   }
 
   void _tapCancelImpl(TapCancelEvent event) {
-    _record.removeWhere((pair) {
+    _records.removeWhere((pair) {
       if (pair.pointerId == event.pointerId) {
         pair.component.onTapCancel(event);
         return true;
