@@ -105,7 +105,7 @@ mixin HasPaint<T extends Object> on Component
 
   /// Returns the current opacity.
   int getAlpha({T? paintId}) {
-    return getPaint(paintId).color.a ~/ 255;
+    return (getPaint(paintId).color.a * 255).round();
   }
 
   /// Shortcut for changing the color of the paint.
